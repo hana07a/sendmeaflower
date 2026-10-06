@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>send me a Letter — prototype</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=DM+Mono:wght@400;500&family=Parisienne&display=swap');
+
+:root{
+  --paper:#f6eee7; --paper2:#eadbd1; --ink:#3c3030; --rose:#b76f80;
+  --rose2:#d59aaa; --rose-deep:#8a4f5c; --sage:#73866d; --sage-deep:#546149;
+  --mauve:#9c7f93; --gold:#c98f4c; --plum:#2c2226; --dark:#241d22;
+  --shadow-soft:0 12px 30px rgba(60,40,36,.18);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:#33282d;color:var(--ink);font-family:"Cormorant Garamond",serif;overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:20;opacity:.16;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.15'/%3E%3C/svg%3E")}
+a{text-decoration:none;color:inherit}
+button{font-family:inherit}
+
+/* ============ NAV ============ */
+.nav{position:absolute;top:18px;left:5%;right:5%;z-index:30;display:flex;align-items:center;justify-content:space-between;background:#f8eee6d9;border:1px solid #d5bbb0;padding:10px 18px;box-shadow:0 5px 18px #241d2220;backdrop-filter:blur(3px)}
+.brand{font-weight:700;letter-spacing:.06em}
+.navlinks{display:flex;gap:28px;font-size:15px}
+.navlinks a{position:relative}
+.navlinks a:hover{color:var(--rose)}
+.btn{border:0;background:var(--rose);color:white;padding:13px 27px;font:500 13px "DM Mono";letter-spacing:.06em;cursor:pointer;box-shadow:0 7px 18px #6d3e4c38;transition:transform .2s ease,filter .2s ease}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.btn:focus-visible,.choice:focus-visible,.envelope:focus-visible,a:focus-visible{outline:2px solid var(--rose-deep);outline-offset:3px}
+.btn.alt{background:#f7eee8;color:#6b4d53;border:1px solid #c9aaa4}
+.buttons{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+
+/* ============ HERO ============ */
+.hero{min-height:680px;position:relative;display:grid;place-items:center;text-align:center;padding:110px 20px 80px;background:
+ radial-gradient(circle at 15% 20%,#fff5 0 2px,transparent 3px),
+ radial-gradient(circle at 75% 15%,#fff6 0 2px,transparent 3px),
+ linear-gradient(120deg,#b79a8c,#f1d9d4 48%,#8c766c);overflow:hidden}
+.hero:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(#241d2220,#f5e8df66),repeating-linear-gradient(90deg,transparent 0 90px,#ffffff0b 91px 93px)}
+.hero-card{position:relative;z-index:5;max-width:760px;padding:30px}
+.kicker{font-family:"DM Mono";font-size:11px;letter-spacing:.2em;text-transform:uppercase}
+.hero h1{font-size:clamp(60px,10vw,120px);line-height:.62;margin:28px 0 35px;font-weight:500}
+.script{font-family:Parisienne,cursive;color:var(--rose);font-size:1.35em}
+.hero p{font-size:21px;max-width:470px;margin:0 auto 28px}
+
+/* ---- decorative layer (kept clear of the center text column) ---- */
+.deco-layer{position:absolute;inset:0;z-index:2;pointer-events:none}
+.home-flower{position:absolute;filter:none;animation:flowerFloat 8s ease-in-out infinite;transform-origin:50% 60%}
+.home-flower .flower-svg{width:100%;height:100%;display:block;transition:transform .5s ease}
+.home-flower:hover .flower-svg{transform:scale(1.08) rotate(-2deg)}
+.f1{left:2%;bottom:6%;width:190px;height:190px;animation-delay:-1.2s}
+.f2{right:2%;top:14%;width:170px;height:170px;animation-delay:-3.4s}
+.f3{right:9%;bottom:4%;width:100px;height:100px;animation-delay:-.6s}
+.f4{left:8%;top:16%;width:96px;height:96px;animation-delay:-5s}
+.f5{left:24%;bottom:2%;width:60px;height:60px;animation-delay:-2.1s}
+@keyframes flowerFloat{
+  0%,100%{transform:translateY(0) rotate(0deg) scale(1)}
+  30%{transform:translateY(-11px) rotate(2deg) scale(1.02)}
+  60%{transform:translateY(-17px) rotate(-1.5deg) scale(1.04)}
+  85%{transform:translateY(-6px) rotate(1deg) scale(1.01)}
+}
+
+.flower-sparkles{position:absolute;inset:0;pointer-events:none}
+.flower-sparkles i{position:absolute;width:7px;height:7px;background:radial-gradient(circle,#fff,transparent 72%);border-radius:50%;opacity:0;animation:sparkleTwinkle 3.6s ease-in-out infinite}
+.flower-sparkles i:nth-child(1){top:4%;left:8%;animation-delay:.2s}
+.flower-sparkles i:nth-child(2){top:60%;right:4%;animation-delay:1.5s}
+.flower-sparkles i:nth-child(3){bottom:6%;left:52%;animation-delay:2.4s}
+@keyframes sparkleTwinkle{0%,100%{opacity:0;transform:scale(.3)}50%{opacity:.95;transform:scale(1)}}
+
+.butterfly{position:absolute;width:50px;animation:flutter 6.5s ease-in-out infinite}
+.butterfly svg{display:block;animation:flap .6s ease-in-out infinite alternate;transform-origin:50% 46%}
+.b1{right:22%;top:10%;animation-delay:-1s}
+.b2{left:14%;bottom:22%;animation-delay:-3.5s;width:38px}
+@keyframes flutter{0%,100%{transform:translate(0,0) rotate(-4deg)}50%{transform:translate(-8px,-16px) rotate(5deg)}}
+@keyframes flap{from{transform:scaleX(1)}to{transform:scaleX(.72)}}
+
+.star-deco{position:absolute;width:14px;height:14px;background:#fff6e9;opacity:.85;
+  clip-path:polygon(50% 0%,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0% 50%,39% 39%);
+  animation:starTwinkle 3.2s ease-in-out infinite}
+@keyframes starTwinkle{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+.s1{left:16%;top:8%;animation-delay:.4s}
+.s2{right:16%;bottom:26%;animation-delay:1.6s}
+.s3{left:42%;top:6%;animation-delay:2.5s;width:10px;height:10px}
+
+.ribbon-deco{position:absolute;top:22px;left:-46px;width:180px;padding:5px 0;background:linear-gradient(90deg,var(--rose-deep),var(--rose));color:#fff8f1;font:10px "DM Mono";text-align:center;letter-spacing:.16em;transform:rotate(-45deg);box-shadow:0 3px 8px #0003;z-index:4}
+.paper-scrap{position:absolute;right:6%;bottom:6%;background:#fff8f1;border:1px solid #e3cdbf;padding:9px 16px;font-family:Parisienne,cursive;font-size:20px;color:#7c5a52;box-shadow:0 8px 16px #3c262622;transform:rotate(4deg);z-index:4}
+.washi-deco{position:absolute;left:5%;top:44%;width:96px;height:24px;background:repeating-linear-gradient(45deg,#e7b9c4,#e7b9c4 6px,#dba7b4 6px,#dba7b4 12px);opacity:.85;transform:rotate(-6deg);box-shadow:0 3px 6px #0002;z-index:4}
+.stamp-deco{position:absolute;top:20px;right:4%;width:52px;height:62px;background:#f3e6d8;border:3px dashed #c9a98f;display:grid;place-items:center;gap:2px;transform:rotate(7deg);box-shadow:0 6px 14px #0003;z-index:4}
+.stamp-deco span{font:8px "DM Mono";color:#8a6b52;letter-spacing:.08em}
+.stamp-deco .stamp-flower{width:24px;height:24px}
+
+/* ============ MAIN / CREATE ============ */
+.paper{background:var(--paper);position:relative}
+.section{padding:75px 7%;max-width:1250px;margin:auto}
+.section-title{text-align:center;font-size:48px;margin:0 0 8px;font-weight:500}
+.section-sub{text-align:center;margin:0 auto 35px;font-size:18px}
+
+.divider{max-width:340px;margin:0 auto;opacity:.85}
+.divider svg{width:100%;height:20px;display:block}
+
+.workspace{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+.panel{background:#f9f0e9;border:1px solid #d8c1b7;padding:25px;box-shadow:0 12px 35px #513c3617;position:relative}
+.panel:before{content:"";position:absolute;inset:8px;border:1px dashed #cdb1a5;pointer-events:none}
+.panel>*{position:relative}
+.panel h3{font-size:28px;margin:0 0 18px}
+.field{margin:14px 0}
+.field label{display:block;font:11px "DM Mono";text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px}
+.input,.textarea{width:100%;border:1px solid #d6bdb2;background:#fffaf6;padding:12px 13px;font:16px "Cormorant Garamond";color:var(--ink);outline:none}
+.textarea{height:145px;resize:vertical}
+.input:focus,.textarea:focus{border-color:var(--rose)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.radio{display:flex;gap:8px;align-items:center;cursor:pointer;font-size:17px}
+.radio input{cursor:pointer}
+.song{display:flex;align-items:center;gap:14px;padding:12px;background:#eee1da;border:1px solid #d2bbb2}
+.album{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#4a3a3f,#241d20 70%);background-size:cover;display:grid;place-items:center;color:#f2e2d8;font-size:18px;position:relative}
+.album:before{content:"";position:absolute;inset:6px;border-radius:50%;border:1px solid #ffffff22}
+.song small{display:block;font:10px "DM Mono";opacity:.65}
+.song b{font-size:17px}
+
+/* ---- flower choice buttons: fixed, consistent, never empty ---- */
+.choices{display:flex;gap:10px;flex-wrap:wrap}
+.choice{border:1px solid #d4bbb0;background:#fff9f4;padding:10px 8px 8px;cursor:pointer;width:78px;height:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:box-shadow .25s ease,transform .25s ease,background .25s ease}
+.choice-flower{width:34px;height:34px;display:block;pointer-events:none}
+.choice-label{font:10px "DM Mono";letter-spacing:.04em;text-transform:uppercase;color:#7c5a52}
+.choice:hover{transform:translateY(-2px);box-shadow:0 8px 16px #513c3620}
+.choice.active{outline:2px solid var(--rose);background:#f4dfe1;box-shadow:0 0 0 4px #b76f8022,0 10px 20px #513c3625}
+.choice.active .choice-flower{animation:choicePulse 2.6s ease-in-out infinite}
+@keyframes choicePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08) translateY(-2px)}}
+
+.preview{min-height:460px;display:grid;place-items:center;background:linear-gradient(145deg,#efe0d9,#f8eee8)}
+.letter{width:min(390px,90%);min-height:340px;background:#fff9f1;padding:46px 35px 36px;box-shadow:0 18px 28px #49342c22;transform:rotate(-1deg);position:relative;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E")}
+.letter:before{content:"";position:absolute;inset:14px;border:1px solid #d9bdb0;pointer-events:none}
+.letter .tape{position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(-3deg);width:92px;height:26px;background:repeating-linear-gradient(45deg,#e7b9c4,#e7b9c4 6px,#f2d0da 6px,#f2d0da 12px);opacity:.9;box-shadow:0 3px 6px #0002}
+.stamp-box{position:absolute;top:-14px;right:18px;width:50px;height:60px;background:#f3e7d8;border:3px dashed #cba883;padding:4px;display:grid;place-items:center;gap:2px;transform:rotate(6deg);box-shadow:0 6px 12px #0003}
+.stamp-box span{font:7px "DM Mono";letter-spacing:.08em;color:#8a6b52}
+.stamp-box .flower-svg{width:26px;height:26px}
+.wax-seal{position:absolute;right:-14px;bottom:-14px;width:56px;height:56px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d98a92,#a24a5b 60%,#7c3542);box-shadow:0 6px 14px #0004,inset 0 -3px 6px #5a1f2a80,inset 0 3px 4px #ffffff40;display:grid;place-items:center;transform:rotate(-8deg)}
+.wax-seal svg{width:26px;height:26px;filter:drop-shadow(0 1px 1px #0006)}
+.letter h4{font-size:26px;margin:0 0 22px}
+.letter p{font-size:18px;line-height:1.45}
+.letter-flower{width:64px;height:64px;margin:14px auto 6px}
+.signature{text-align:right;margin-top:24px;font-family:Parisienne;font-size:25px;color:var(--rose)}
+
+/* ============ ENVELOPE / DARK SECTION ============ */
+.dark-section{background:linear-gradient(145deg,#211b20,#4b343a);color:#f8eee8;padding:75px 7%}
+.dark-inner{max-width:1200px;margin:auto}
+.dark-section .section-title{color:#f8eee8}
+.envelope-wrap{text-align:center;margin:30px auto;max-width:530px}
+.envelope{height:260px;position:relative;cursor:pointer;perspective:1000px}
+.env-flap{position:absolute;top:0;left:0;right:0;height:52%;background:linear-gradient(145deg,#ead7cb,#d5b9ad);clip-path:polygon(0 0,100% 0,50% 100%);transform-origin:top center;transition:transform .9s cubic-bezier(.6,.05,.2,1),opacity .9s ease;z-index:3;box-shadow:0 6px 14px #0002}
+.envelope.opened .env-flap{transform:rotateX(-178deg);opacity:.001}
+.env-face{position:absolute;inset:0;background:#ead7cb;display:grid;place-items:center;color:#604a4d;box-shadow:0 25px 50px #0007;z-index:1;overflow:hidden}
+.env-face:before{content:"";position:absolute;inset:0;background:linear-gradient(35deg,transparent 49.5%,#d5b9ad 50%,transparent 50.5%)}
+.seal{width:65px;height:65px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#c8808f,#8f4a58 70%);color:white;display:grid;place-items:center;font-size:28px;z-index:2;box-shadow:0 5px 12px #0003;position:relative;transition:transform .5s ease,opacity .5s ease}
+.envelope.opened .seal{transform:scale(0);opacity:0}
+.open-label{position:absolute;bottom:25px;font:11px "DM Mono";letter-spacing:.18em;z-index:3;transition:opacity .4s ease}
+.envelope.opened .open-label{opacity:0}
+.env-peek{position:absolute;left:9%;right:9%;bottom:0;height:0;overflow:hidden;background:#fff9f1;z-index:2;box-shadow:0 -8px 18px #0002;transition:height .8s cubic-bezier(.2,.9,.3,1) .15s;display:flex;align-items:center;justify-content:center}
+.envelope.opened .env-peek{height:58%}
+.peek-inner{position:relative;width:100%;height:100%;display:grid;place-items:center}
+.peek-flower{width:70px;height:70px;opacity:0}
+.envelope.opened .peek-flower{animation:bloomIn 1s cubic-bezier(.34,1.56,.64,1) .35s both}
+@keyframes bloomIn{from{transform:scale(.15);opacity:0}to{transform:scale(1);opacity:1}}
+.peek-petal{position:absolute;width:13px;height:19px;background:linear-gradient(145deg,#eab6c2,#b76f80);border-radius:70% 70% 70% 0;opacity:0;top:38%;left:50%;transform:translate(-50%,-50%) scale(.3) rotate(0deg)}
+.envelope.opened .peek-petal{opacity:.9;transition:all 1.1s cubic-bezier(.2,.8,.3,1)}
+.envelope.opened .p1{transform:translate(-95%,-150%) scale(1) rotate(-40deg);transition-delay:.5s}
+.envelope.opened .p2{transform:translate(30%,-170%) scale(1) rotate(25deg);transition-delay:.65s}
+.envelope.opened .p3{transform:translate(-30%,-200%) scale(.9) rotate(70deg);transition-delay:.8s}
+.reveal{max-height:0;overflow:hidden;transition:max-height 1s ease}
+.reveal.open{max-height:800px}
+.received{max-width:520px;margin:20px auto;background:#f8eee7;color:var(--ink);padding:35px;position:relative;text-align:center;box-shadow:var(--shadow-soft)}
+.bloom-flower{width:88px;height:88px;margin:0 auto 12px}
+.reveal.open .bloom-flower{animation:bloomIn 1s cubic-bezier(.34,1.56,.64,1) both}
+.received-from{font-family:Parisienne;font-size:20px;color:var(--rose-deep)}
+
+/* ============ GARDEN ============ */
+.garden{background:#ead8d0;padding:75px 7%}
+.garden-grid{max-width:1150px;margin:35px auto 0;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.note{background:#fff8f1;padding:22px 18px;min-height:200px;box-shadow:0 9px 20px #513c3620;transform:rotate(var(--r));position:relative;text-align:center}
+.note:nth-child(2){--r:1.4deg}.note:nth-child(3){--r:-1deg}.note:nth-child(4){--r:1deg}.note:nth-child(5){--r:-1.5deg}
+.note:nth-child(6){--r:.8deg}.note:nth-child(7){--r:-1.2deg}.note:nth-child(8){--r:1.6deg}
+.note .mini{width:44px;height:44px;margin:0 auto 12px}
+.note p{font-size:19px;line-height:1.3;margin:0 0 10px}
+.note small{font:10px "DM Mono";opacity:.55}
+
+/* ============ SHARE / FOOTER ============ */
+.share{background:var(--paper);padding:70px 20px;text-align:center}
+.sharebox{max-width:620px;margin:auto;background:#f9f0e9;border:1px solid #d8c1b7;padding:35px;box-shadow:0 15px 35px #513c3617}
+.sharebox input{width:100%;padding:13px;border:1px solid #d6bdb2;background:white;margin:12px 0 16px;font:13px "DM Mono"}
+footer{background:#211b20;color:#d8c4bd;text-align:center;padding:28px;font:10px "DM Mono";letter-spacing:.1em}
+
+@media(max-width:800px){
+  .navlinks{display:none}
+  .workspace{grid-template-columns:1fr}
+  .garden-grid{grid-template-columns:1fr 1fr}
+  .hero{min-height:600px}
+  .section{padding:55px 5%}
+  .f1{width:120px;height:120px}
+  .f2{width:110px;height:110px}
+  .f3,.f4{width:70px;height:70px}
+  .washi-deco,.paper-scrap{display:none}
+  .stamp-deco{width:42px;height:52px;top:14px}
+}
+@media(max-width:500px){
+  .garden-grid{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr}
+  .hero h1{font-size:70px}
+  .panel{padding:18px}
+  .f5,.b1,.b2,.s1,.s2,.s3,.ribbon-deco{display:none}
+  .f1{left:0;bottom:2%;width:90px;height:90px}
+  .f2{right:0;top:8%;width:90px;height:90px}
+  .f3,.f4{display:none}
+}
+@media (prefers-reduced-motion: reduce){
+  .home-flower,.flower-sparkles i,.butterfly,.butterfly svg,.star-deco,
+  .choice.active .choice-flower{animation:none !important}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ GLOBAL SVG DEFS (shared gradients used by every flower) ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+  <radialGradient id="roseOuter" cx="35%" cy="30%" r="75%">
+    <stop offset="0%" stop-color="#eab6c2"/><stop offset="55%" stop-color="#d59aaa"/><stop offset="100%" stop-color="#b76f80"/>
+  </radialGradient>
+  <radialGradient id="roseMid" cx="35%" cy="30%" r="75%">
+    <stop offset="0%" stop-color="#c98594"/><stop offset="60%" stop-color="#a86572"/><stop offset="100%" stop-color="#8a4f5c"/>
+  </radialGradient>
+  <radialGradient id="roseInner" cx="35%" cy="30%" r="75%">
+    <stop offset="0%" stop-color="#9c5c69"/><stop offset="100%" stop-color="#6f3c46"/>
+  </radialGradient>
+  <radialGradient id="roseCenter" cx="35%" cy="30%" r="75%">
+    <stop offset="0%" stop-color="#7a4550"/><stop offset="100%" stop-color="#54262f"/>
+  </radialGradient>
+
+  <linearGradient id="tulipLeft" x1="0" y1="1" x2="1" y2="0">
+    <stop offset="0%" stop-color="#a24a5e"/><stop offset="100%" stop-color="#c9697e"/>
+  </linearGradient>
+  <linearGradient id="tulipCenter" x1="0" y1="1" x2="0" y2="0">
+    <stop offset="0%" stop-color="#c76b80"/><stop offset="100%" stop-color="#f0aebd"/>
+  </linearGradient>
+  <linearGradient id="tulipRight" x1="1" y1="1" x2="0" y2="0">
+    <stop offset="0%" stop-color="#9c4256"/><stop offset="100%" stop-color="#c9697e"/>
+  </linearGradient>
+  <linearGradient id="tulipStem" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#8fa383"/><stop offset="100%" stop-color="#5f7355"/>
+  </linearGradient>
+
+  <radialGradient id="sunflowerPetal" cx="50%" cy="100%" r="100%">
+    <stop offset="0%" stop-color="#e2872f"/><stop offset="60%" stop-color="#f2b73f"/><stop offset="100%" stop-color="#f8d264"/>
+  </radialGradient>
+  <radialGradient id="sunflowerCenter" cx="35%" cy="30%" r="70%">
+    <stop offset="0%" stop-color="#7a5233"/><stop offset="100%" stop-color="#4a3220"/>
+  </radialGradient>
+
+  <radialGradient id="cherryPetal" cx="30%" cy="25%" r="80%">
+    <stop offset="0%" stop-color="#fff3f5"/><stop offset="55%" stop-color="#fbd0dc"/><stop offset="100%" stop-color="#f0a8bc"/>
+  </radialGradient>
+  <radialGradient id="cherryCenter" cx="35%" cy="30%" r="70%">
+    <stop offset="0%" stop-color="#f6d878"/><stop offset="100%" stop-color="#dba53f"/>
+  </radialGradient>
+
+  <radialGradient id="daisyPetal" cx="30%" cy="20%" r="85%">
+    <stop offset="0%" stop-color="#ffffff"/><stop offset="60%" stop-color="#f7efe2"/><stop offset="100%" stop-color="#e6d6bd"/>
+  </radialGradient>
+  <radialGradient id="daisyCenter" cx="35%" cy="30%" r="70%">
+    <stop offset="0%" stop-color="#f4cf6e"/><stop offset="100%" stop-color="#d99f3c"/>
+  </radialGradient>
+
+  <radialGradient id="lavenderBud" cx="35%" cy="30%" r="75%">
+    <stop offset="0%" stop-color="#c9b3de"/><stop offset="60%" stop-color="#9d84bd"/><stop offset="100%" stop-color="#71578f"/>
+  </radialGradient>
+  <linearGradient id="lavenderStem" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#8fa383"/><stop offset="100%" stop-color="#5f7355"/>
+  </linearGradient>
+
+  <linearGradient id="butterflyWing" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#eab6c2"/><stop offset="100%" stop-color="#b76f80"/>
+  </linearGradient>
+  <linearGradient id="butterflyWingLower" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0%" stop-color="#c9b3de"/><stop offset="100%" stop-color="#9d84bd"/>
+  </linearGradient>
+</defs>
+</svg>
+
+<nav class="nav">
+  <div class="brand">send me a letter</div>
+  <div class="navlinks">
+    <a href="#home">home</a><a href="#create">create</a><a href="#garden">the garden</a><a href="#about">about</a>
+  </div>
+  <a class="btn" href="#create">write a letter →</a>
+</nav>
+
+<header class="hero" id="home">
+  <div class="deco-layer" aria-hidden="true">
+    <div class="ribbon-deco">handmade with love</div>
+    <div class="home-flower f1" data-flower="sunflower" data-sparkle></div>
+    <div class="home-flower f2" data-flower="rose" data-sparkle></div>
+    <div class="home-flower f3" data-flower="cherry"></div>
+    <div class="home-flower f4" data-flower="lavender"></div>
+    <div class="home-flower f5" data-flower="daisy"></div>
+    <div class="butterfly b1"><svg viewBox="0 0 60 46">
+      <path d="M30,23 C18,4 2,6 4,20 C6,30 20,28 30,23 Z" fill="url(#butterflyWing)"/>
+      <path d="M30,23 C42,4 58,6 56,20 C54,30 40,28 30,23 Z" fill="url(#butterflyWing)"/>
+      <path d="M30,23 C20,34 8,36 10,42 C14,46 24,38 30,23 Z" fill="url(#butterflyWingLower)" opacity="0.9"/>
+      <path d="M30,23 C40,34 52,36 50,42 C46,46 36,38 30,23 Z" fill="url(#butterflyWingLower)" opacity="0.9"/>
+      <line x1="30" y1="10" x2="30" y2="34" stroke="#5a3d3f" stroke-width="2" stroke-linecap="round"/>
+    </svg></div>
+    <div class="butterfly b2"><svg viewBox="0 0 60 46">
+      <path d="M30,23 C18,4 2,6 4,20 C6,30 20,28 30,23 Z" fill="url(#butterflyWing)"/>
+      <path d="M30,23 C42,4 58,6 56,20 C54,30 40,28 30,23 Z" fill="url(#butterflyWing)"/>
+      <path d="M30,23 C20,34 8,36 10,42 C14,46 24,38 30,23 Z" fill="url(#butterflyWingLower)" opacity="0.9"/>
+      <path d="M30,23 C40,34 52,36 50,42 C46,46 36,38 30,23 Z" fill="url(#butterflyWingLower)" opacity="0.9"/>
+      <line x1="30" y1="10" x2="30" y2="34" stroke="#5a3d3f" stroke-width="2" stroke-linecap="round"/>
+    </svg></div>
+    <div class="star-deco s1"></div><div class="star-deco s2"></div><div class="star-deco s3"></div>
+    <div class="washi-deco"></div>
+    <div class="paper-scrap">with love, always</div>
+    <div class="stamp-deco"><div class="stamp-flower" data-flower="tulip"></div><span>PAR&nbsp;AVION</span></div>
+  </div>
+  <div class="hero-card">
+    <div class="kicker">anonymous · sincere · forever here</div>
+    <h1>send me a<br><span class="script">Letter</span></h1>
+    <p>some words, a song, and a flower.<br>for someone, anywhere.</p>
+    <div class="buttons"><a class="btn" href="#create">write a letter</a><a class="btn alt" href="#garden">explore the garden</a></div>
+  </div>
+</header>
+
+<main class="paper">
+<div class="divider" aria-hidden="true"><svg viewBox="0 0 300 24" preserveAspectRatio="none">
+  <path d="M0,12 C50,2 80,22 130,12 C180,2 210,22 260,12 C280,8 290,14 300,12" fill="none" stroke="#9c8a72" stroke-width="1.4" opacity="0.5"/>
+  <circle cx="65" cy="9" r="2" fill="#8a9a7a" opacity="0.6"/><circle cx="195" cy="15" r="2" fill="#c98fa0" opacity="0.6"/>
+</svg></div>
+
+<section class="section" id="create">
+  <h2 class="section-title">Write Your Letter</h2>
+  <p class="section-sub">some words can bloom into something beautiful.</p>
+  <div class="workspace">
+    <div class="panel">
+      <h3>your little message</h3>
+      <div class="row">
+        <div class="field"><label>from</label><label class="radio"><input type="radio" name="anon" id="anonYes" checked> Anonymous</label></div>
+        <div class="field"><label>&nbsp;</label><label class="radio"><input type="radio" name="anon" id="anonNo"> Use my name</label></div>
+      </div>
+      <div class="field"><label>your name (optional)</label><input class="input" id="name" placeholder="e.g. luna, hana, or just a nickname..."></div>
+      <div class="field"><label>to</label><input class="input" id="to" placeholder="who is this for?"></div>
+      <div class="field"><label>your message</label><textarea class="textarea" id="message" placeholder="write your message here..."></textarea></div>
+      <div class="field"><label>add a song (spotify)</label>
+        <div class="song"><div class="album">♫</div><div style="flex:1"><small>PASTE SPOTIFY LINK</small><b>I Wanna Be Yours</b><small>Arctic Monkeys</small></div><span>▶</span></div>
+      </div>
+      <div class="field"><label>choose your flower</label>
+        <div class="choices" role="group" aria-label="Choose your flower">
+          <button type="button" class="choice active" data-type="rose" aria-pressed="true" aria-label="Rose">
+            <span class="choice-flower" data-flower="rose"></span><span class="choice-label">Rose</span>
+          </button>
+          <button type="button" class="choice" data-type="tulip" aria-pressed="false" aria-label="Tulip">
+            <span class="choice-flower" data-flower="tulip"></span><span class="choice-label">Tulip</span>
+          </button>
+          <button type="button" class="choice" data-type="sunflower" aria-pressed="false" aria-label="Sunflower">
+            <span class="choice-flower" data-flower="sunflower"></span><span class="choice-label">Sunflower</span>
+          </button>
+          <button type="button" class="choice" data-type="cherry" aria-pressed="false" aria-label="Cherry Blossom">
+            <span class="choice-flower" data-flower="cherry"></span><span class="choice-label">Cherry</span>
+          </button>
+          <button type="button" class="choice" data-type="lavender" aria-pressed="false" aria-label="Lavender">
+            <span class="choice-flower" data-flower="lavender"></span><span class="choice-label">Lavender</span>
+          </button>
+          <button type="button" class="choice" data-type="daisy" aria-pressed="false" aria-label="Daisy">
+            <span class="choice-flower" data-flower="daisy"></span><span class="choice-label">Daisy</span>
+          </button>
+        </div>
+      </div>
+      <div class="field"><label>visibility</label>
+        <label class="radio"><input type="radio" name="vis" id="visPrivate" checked> Private (only with the link)</label>
+        <label class="radio"><input type="radio" name="vis" id="visPublic"> Public (appears in the garden)</label>
+      </div>
+      <button type="button" class="btn" onclick="makePreview()">preview your letter →</button>
+    </div>
+
+    <div class="panel preview" id="preview">
+      <div class="letter">
+        <div class="tape"></div>
+        <div class="stamp-box"><span data-flower="rose" id="stampFlowerSlot" class="flower-svg-holder"></span><span>SEALED</span></div>
+        <h4 id="previewTo">To, you</h4>
+        <p id="previewMessage">I hope you're doing okay.<br>Thank you for existing.<br>Some people really make the world a softer place, and you're one of them.</p>
+        <div class="letter-flower" id="previewFlowerSlot" data-flower="rose"></div>
+        <div class="signature" id="previewFrom">— Anonymous</div>
+        <div class="wax-seal"><svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="26" fill="url(#roseInner)"/>
+          <circle cx="50" cy="50" r="10" fill="#f6ecd8" opacity="0.85"/>
+        </svg></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="dark-section">
+  <div class="dark-inner">
+    <h2 class="section-title">someone sent you a letter...</h2>
+    <div class="envelope-wrap">
+      <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Open your letter" aria-expanded="false">
+        <div class="env-peek"><div class="peek-inner">
+          <div class="peek-flower bloom-flower" data-flower="rose" id="peekFlowerSlot"></div>
+          <div class="peek-petal p1"></div><div class="peek-petal p2"></div><div class="peek-petal p3"></div>
+        </div></div>
+        <div class="env-flap"></div>
+        <div class="env-face"><div class="seal">✉</div><div class="open-label">click to open</div></div>
+      </div>
+      <div class="reveal" id="reveal">
+        <div class="received">
+          <div class="bloom-flower" id="bloomFlowerSlot" data-flower="rose"></div>
+          <h2>a flower for you...</h2>
+          <p id="receivedText">I hope you find the peace you're looking for.</p>
+          <p class="received-from" id="receivedFrom">— anonymous</p>
+          <div class="song">♫ &nbsp; <span id="receivedSong">I Wanna Be Yours · Arctic Monkeys</span> &nbsp; ▶</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="garden" id="garden">
+  <h2 class="section-title">The Garden</h2>
+  <p class="section-sub">a collection of words, from different people<br>for different stories.</p>
+  <div class="garden-grid">
+    <article class="note"><div class="mini" data-flower="tulip"></div><p>i hope you find the peace you're looking for.</p><small>— anonymous</small></article>
+    <article class="note"><div class="mini" data-flower="daisy"></div><p>you did well today. i'm proud of you.</p><small>— someone</small></article>
+    <article class="note"><div class="mini" data-flower="cherry"></div><p>maybe in another life, we meet again.</p><small>— luna</small></article>
+    <article class="note"><div class="mini" data-flower="rose"></div><p>thank you for being here.</p><small>— anonymous</small></article>
+    <article class="note"><div class="mini" data-flower="lavender"></div><p>please remember to be gentle with yourself.</p><small>— someone</small></article>
+    <article class="note"><div class="mini" data-flower="sunflower"></div><p>you make ordinary days feel a little brighter.</p><small>— anonymous</small></article>
+    <article class="note"><div class="mini" data-flower="tulip"></div><p>i'm glad our paths crossed.</p><small>— aria</small></article>
+    <article class="note"><div class="mini" data-flower="cherry"></div><p>this is your reminder: you matter.</p><small>— someone</small></article>
+  </div>
+</section>
+
+<div class="divider" aria-hidden="true"><svg viewBox="0 0 300 24" preserveAspectRatio="none">
+  <path d="M0,12 C50,2 80,22 130,12 C180,2 210,22 260,12 C280,8 290,14 300,12" fill="none" stroke="#9c8a72" stroke-width="1.4" opacity="0.5"/>
+  <circle cx="65" cy="9" r="2" fill="#8a9a7a" opacity="0.6"/><circle cx="195" cy="15" r="2" fill="#c98fa0" opacity="0.6"/>
+</svg></div>
+
+<section class="share" id="about">
+  <div class="sharebox">
+    <h2 class="section-title" style="font-size:38px">Your letter is ready!</h2>
+    <p>Here's your link. Share it with someone special.</p>
+    <input id="shareLink" value="https://sendmealetter.local/letter/8fj29x" readonly>
+    <button type="button" class="btn" onclick="copyLink()">copy link</button>
+    <p id="copied" style="font:11px 'DM Mono';opacity:.7" aria-live="polite"></p>
+  </div>
+</section>
+</main>
+<footer>send me a letter · a little place for words you were too shy to say ♡</footer>
+
+<script>
+/* ================================================================
+   FLOWER SYSTEM
+   One shared renderer used everywhere a flower appears: the home
+   page decorations, the create-page selector, the letter preview,
+   the stamp, the envelope bloom, and the garden cards.
+   Add a new flower by adding one shape function + one label entry.
+   ================================================================ */
+const FLOWER_LABELS = {
+  rose: 'Rose', tulip: 'Tulip', sunflower: 'Sunflower',
+  cherry: 'Cherry Blossom', lavender: 'Lavender', daisy: 'Daisy'
+};
+
+function petalPath(length, width){
+  const w = width, l = length;
+  return 'M50,50 C' + (50-w) + ',' + (50-l*0.58).toFixed(1) + ' ' + (50-w*0.32).toFixed(1) + ',' + (50-l).toFixed(1) + ' 50,' + (50-l).toFixed(1) +
+         ' C' + (50+w*0.32).toFixed(1) + ',' + (50-l).toFixed(1) + ' ' + (50+w) + ',' + (50-l*0.58).toFixed(1) + ' 50,50 Z';
+}
+
+function petalRing(count, length, width, fill, rotateOffset, opacity){
+  rotateOffset = rotateOffset || 0;
+  opacity = opacity === undefined ? 1 : opacity;
+  const d = petalPath(length, width);
+  let out = '';
+  for(let i=0;i<count;i++){
+    const angle = (360/count)*i + rotateOffset;
+    out += '<path transform="rotate(' + angle.toFixed(1) + ' 50 50)" d="' + d + '" fill="' + fill + '" opacity="' + opacity + '"/>';
+  }
+  return out;
+}
+
+function seedDots(count, radius, color, opacity){
+  let out = '';
+  for(let i=0;i<count;i++){
+    const a = (Math.PI*2/count)*i;
+    const cx = (50+Math.cos(a)*radius).toFixed(1);
+    const cy = (50+Math.sin(a)*radius).toFixed(1);
+    out += '<circle cx="' + cx + '" cy="' + cy + '" r="1" fill="' + color + '" opacity="' + opacity + '"/>';
+  }
+  return out;
+}
+
+function roseBody(){
+  return petalRing(8, 34, 20, 'url(#roseOuter)', 0) +
+         petalRing(7, 26, 16, 'url(#roseMid)', 18) +
+         petalRing(6, 17, 11, 'url(#roseInner)', 9) +
+         '<circle cx="50" cy="50" r="7" fill="url(#roseCenter)"/>' +
+         '<ellipse cx="46" cy="45" rx="3" ry="1.5" fill="#fff" opacity="0.5" transform="rotate(-20 46 45)"/>';
+}
+
+function sunflowerBody(){
+  return petalRing(16, 38, 9, 'url(#sunflowerPetal)', 0) +
+         '<circle cx="50" cy="50" r="16" fill="url(#sunflowerCenter)"/>' +
+         seedDots(7, 6, '#3a2717', 0.5) +
+         seedDots(11, 11, '#3a2717', 0.4) +
+         '<ellipse cx="45" cy="45" rx="4" ry="2" fill="#fff" opacity="0.25" transform="rotate(-25 45 45)"/>';
+}
+
+function cherryBody(){
+  let out = '';
+  for(let i=0;i<5;i++){
+    const angle = i*72;
+    out += '<path transform="rotate(' + angle + ' 50 50)" d="M50,50 C28,46 26,20 42,10 C46,8 50,8 50,8 C50,8 54,8 58,10 C74,20 72,46 50,50 Z" fill="url(#cherryPetal)"/>';
+  }
+  out += '<circle cx="50" cy="50" r="7" fill="url(#cherryCenter)"/>';
+  out += seedDots(5, 4, '#a9722f', 0.8);
+  out += '<ellipse cx="44" cy="44" rx="3" ry="1.5" fill="#fff" opacity="0.45" transform="rotate(-20 44 44)"/>';
+  return out;
+}
+
+function daisyBody(){
+  return petalRing(14, 36, 7, 'url(#daisyPetal)', 0) +
+         '<circle cx="50" cy="50" r="11" fill="url(#daisyCenter)"/>' +
+         seedDots(8, 5, '#a97a2c', 0.5) +
+         '<ellipse cx="46" cy="46" rx="3" ry="1.5" fill="#fff" opacity="0.5" transform="rotate(-20 46 46)"/>';
+}
+
+function tulipBody(){
+  return '<path d="M50,64 C50,78 50,88 50,96" stroke="url(#tulipStem)" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+    '<path d="M50,80 C40,78 32,82 28,90 C38,90 46,86 50,80 Z" fill="url(#tulipStem)"/>' +
+    '<path transform="rotate(-16 50 60)" d="M50,64 C36,60 30,40 38,22 C42,14 48,12 50,12 C50,30 50,50 50,64 Z" fill="url(#tulipLeft)"/>' +
+    '<path transform="rotate(16 50 60)" d="M50,64 C64,60 70,40 62,22 C58,14 52,12 50,12 C50,30 50,50 50,64 Z" fill="url(#tulipRight)"/>' +
+    '<path d="M50,64 C44,58 40,38 44,18 C46,12 48,10 50,10 C52,10 54,12 56,18 C60,38 56,58 50,64 Z" fill="url(#tulipCenter)"/>' +
+    '<ellipse cx="46" cy="24" rx="2.6" ry="6" fill="#fff" opacity="0.4" transform="rotate(-8 46 24)"/>';
+}
+
+function lavenderBody(){
+  let out = '<path d="M50,95 C50,80 50,60 50,45" stroke="url(#lavenderStem)" stroke-width="3" fill="none" stroke-linecap="round"/>';
+  out += '<path d="M50,78 C44,76 38,78 34,84 C40,85 46,83 50,78 Z" fill="url(#lavenderStem)"/>';
+  out += '<path d="M50,70 C56,68 62,70 66,76 C60,77 54,75 50,70 Z" fill="url(#lavenderStem)"/>';
+  const budCount = 11;
+  for(let i=0;i<budCount;i++){
+    const t = i/(budCount-1);
+    const y = 44 - t*38;
+    const xOff = (i%2===0? -1:1) * (3 + (1-t)*2);
+    const size = 4.2 - t*1.6;
+    const cx = (50+xOff).toFixed(1);
+    out += '<ellipse cx="' + cx + '" cy="' + y.toFixed(1) + '" rx="' + size.toFixed(1) + '" ry="' + (size*1.3).toFixed(1) + '" fill="url(#lavenderBud)" transform="rotate(' + (xOff*4).toFixed(0) + ' ' + cx + ' ' + y.toFixed(1) + ')"/>';
+  }
+  out += '<ellipse cx="47" cy="14" rx="1.4" ry="2.2" fill="#fff" opacity="0.4"/>';
+  return out;
+}
+
+const FLOWER_BODIES = {
+  rose: roseBody, tulip: tulipBody, sunflower: sunflowerBody,
+  cherry: cherryBody, lavender: lavenderBody, daisy: daisyBody
+};
+
+function flowerSVGMarkup(type){
+  const body = (FLOWER_BODIES[type] || FLOWER_BODIES.rose)();
+  const label = FLOWER_LABELS[type] || type;
+  return '<svg class="flower-svg" viewBox="0 0 100 100" role="img" aria-label="' + label + ' illustration">' + body + '</svg>';
+}
+
+function renderFlowerInto(el, type){
+  if(!el) return;
+  el.dataset.flower = type;
+  el.innerHTML = flowerSVGMarkup(type);
+}
+
+function addSparkles(el){
+  const s = document.createElement('span');
+  s.className = 'flower-sparkles';
+  s.setAttribute('aria-hidden', 'true');
+  s.innerHTML = '<i></i><i></i><i></i>';
+  el.appendChild(s);
+}
+
+function initFlowers(){
+  document.querySelectorAll('[data-flower]').forEach(function(el){
+    renderFlowerInto(el, el.dataset.flower);
+    if(el.hasAttribute('data-sparkle')) addSparkles(el);
+  });
+}
+
+/* ================================================================
+   APP STATE
+   Shaped so this can later be POSTed straight to a PHP/MySQL
+   endpoint: { id, senderName, recipientName, message, spotifyUrl,
+   flowerType, visibility, createdDate } -> /letter/{id}
+   ================================================================ */
+let currentFlower = 'rose';
+const letterData = {
+  id: null, senderName: '', recipientName: '', message: '',
+  spotifyUrl: '', flowerType: 'rose', visibility: 'private', createdDate: null
+};
+
+function generateLetterId(){
+  return Math.random().toString(36).slice(2, 8);
+}
+
+function makePreview(){
+  const to = document.getElementById('to').value.trim();
+  const msg = document.getElementById('message').value.trim();
+  const name = document.getElementById('name').value.trim();
+  const useOwnName = document.getElementById('anonNo').checked;
+  const isPublic = document.getElementById('visPublic').checked;
+
+  letterData.recipientName = to;
+  letterData.message = msg;
+  letterData.senderName = useOwnName ? name : '';
+  letterData.flowerType = currentFlower;
+  letterData.visibility = isPublic ? 'public' : 'private';
+  letterData.createdDate = new Date().toISOString();
+  if(!letterData.id) letterData.id = generateLetterId();
+
+  const messageHtml = (msg || "I hope you're doing okay.<br>Thank you for existing.").replace(/\n/g, '<br>');
+  document.getElementById('previewTo').textContent = 'To, ' + (to || 'you');
+  document.getElementById('previewMessage').innerHTML = messageHtml;
+  document.getElementById('previewFrom').textContent = '— ' + (useOwnName && name ? name : 'Anonymous');
+
+  document.getElementById('receivedText').textContent = msg || "I hope you find the peace you're looking for.";
+  document.getElementById('receivedFrom').textContent = '— ' + (useOwnName && name ? name : 'anonymous');
+
+  document.getElementById('shareLink').value = 'https://sendmealetter.local/letter/' + letterData.id;
+
+  document.getElementById('preview').scrollIntoView({behavior: 'smooth', block: 'center'});
+}
+
+function selectFlower(type){
+  currentFlower = type;
+  letterData.flowerType = type;
+  renderFlowerInto(document.getElementById('previewFlowerSlot'), type);
+  renderFlowerInto(document.getElementById('stampFlowerSlot'), type);
+  renderFlowerInto(document.getElementById('peekFlowerSlot'), type);
+  renderFlowerInto(document.getElementById('bloomFlowerSlot'), type);
+}
+
+function initFlowerChoices(){
+  document.querySelectorAll('.choice').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.choice').forEach(function(x){
+        x.classList.remove('active');
+        x.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      selectFlower(btn.dataset.type);
+    });
+  });
+}
+
+function openLetter(){
+  const env = document.getElementById('envelope');
+  const reveal = document.getElementById('reveal');
+  const isOpen = env.classList.toggle('opened');
+  env.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  if(isOpen){
+    setTimeout(function(){ reveal.classList.add('open'); }, 550);
+  } else {
+    reveal.classList.remove('open');
+  }
+}
+
+function initEnvelope(){
+  const env = document.getElementById('envelope');
+  env.addEventListener('click', openLetter);
+  env.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      openLetter();
+    }
+  });
+}
+
+function copyLink(){
+  const input = document.getElementById('shareLink');
+  input.select();
+  navigator.clipboard && navigator.clipboard.writeText(input.value);
+  document.getElementById('copied').textContent = 'copied to clipboard ♡';
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  initFlowers();
+  initFlowerChoices();
+  initEnvelope();
+});
+</script>
+</body>
+</html>
